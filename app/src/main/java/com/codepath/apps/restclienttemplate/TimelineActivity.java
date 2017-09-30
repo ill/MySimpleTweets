@@ -20,12 +20,16 @@ import cz.msebera.android.httpclient.Header;
 
 public class TimelineActivity extends AppCompatActivity {
 
+    static final int PAGE_SIZE = 5;
+
     private EndlessRecyclerViewScrollListener scrollListener;
 
     TwitterClient client;
     TweetAdapter tweetAdapter;
     ArrayList<Tweet> tweets;
     RecyclerView rvTweets;
+
+    long currentMaxId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,16 +53,17 @@ public class TimelineActivity extends AppCompatActivity {
                 // Triggered only when new data needs to be appended to the list
                 // Add whatever code is needed to append new items to the bottom of the list
                 //loadNextDataFromApi(page);
-                populateTimelineDelayed(25, -1, 500);
+                populateTimelineDelayed(PAGE_SIZE, currentMaxId, 500);
             }
         };
         // Adds the scroll listener to RecyclerView
         rvTweets.addOnScrollListener(scrollListener);
 
-        populateTimelineDelayed(25, -1, 500);
+        currentMaxId = -1;
+        populateTimelineDelayed(PAGE_SIZE, -1, 500);
     }
 
-    void populateTimelineDelayed(final int count, final int maxId, long delayMillis) {
+    void populateTimelineDelayed(final int count, final long maxId, long delayMillis) {
         final Handler handler = new Handler();
         handler.postDelayed(new Runnable() {
             @Override
@@ -68,7 +73,13 @@ public class TimelineActivity extends AppCompatActivity {
         }, delayMillis);
     }
 
-    private void populateTimeline(int count, int maxId) {
+    private void tryUpdateMaxId(long newMaxId) {
+        if (currentMaxId < 0 || newMaxId < currentMaxId) {
+            currentMaxId = newMaxId - 1;
+        }
+    }
+
+    private void populateTimeline(int count, long maxId) {
         client.getHomeTimeline(count, maxId, new JsonHttpResponseHandler() {
             @Override
             public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
@@ -83,6 +94,9 @@ public class TimelineActivity extends AppCompatActivity {
                     try {
                         Tweet tweet = Tweet.fromJSON(response.getJSONObject(i));
                         tweets.add(tweet);
+
+                        tryUpdateMaxId(tweet.uid);
+
                         tweetAdapter.notifyItemInserted(tweets.size() - 1);
                     }
                     catch (JSONException e) {
