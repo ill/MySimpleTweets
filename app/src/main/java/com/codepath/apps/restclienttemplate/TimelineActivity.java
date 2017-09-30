@@ -1,6 +1,7 @@
 package com.codepath.apps.restclienttemplate;
 
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -19,6 +20,8 @@ import cz.msebera.android.httpclient.Header;
 
 public class TimelineActivity extends AppCompatActivity {
 
+    private EndlessRecyclerViewScrollListener scrollListener;
+
     TwitterClient client;
     TweetAdapter tweetAdapter;
     ArrayList<Tweet> tweets;
@@ -35,14 +38,38 @@ public class TimelineActivity extends AppCompatActivity {
         tweets = new ArrayList<>();
         tweetAdapter = new TweetAdapter(tweets);
 
-        rvTweets.setLayoutManager(new LinearLayoutManager(this));
+        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
+
+        rvTweets.setLayoutManager(linearLayoutManager);
         rvTweets.setAdapter(tweetAdapter);
 
-        populateTimeline();
+        scrollListener = new EndlessRecyclerViewScrollListener(linearLayoutManager) {
+            @Override
+            public void onLoadMore(int page, int totalItemsCount, RecyclerView view) {
+                // Triggered only when new data needs to be appended to the list
+                // Add whatever code is needed to append new items to the bottom of the list
+                //loadNextDataFromApi(page);
+                populateTimelineDelayed(25, -1, 500);
+            }
+        };
+        // Adds the scroll listener to RecyclerView
+        rvTweets.addOnScrollListener(scrollListener);
+
+        populateTimelineDelayed(25, -1, 500);
     }
 
-    private void populateTimeline() {
-        client.getHomeTimeline(new JsonHttpResponseHandler() {
+    void populateTimelineDelayed(final int count, final int maxId, long delayMillis) {
+        final Handler handler = new Handler();
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                populateTimeline(count, maxId);
+            }
+        }, delayMillis);
+    }
+
+    private void populateTimeline(int count, int maxId) {
+        client.getHomeTimeline(count, maxId, new JsonHttpResponseHandler() {
             @Override
             public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
                 Log.d("TwitterClient", response.toString());
