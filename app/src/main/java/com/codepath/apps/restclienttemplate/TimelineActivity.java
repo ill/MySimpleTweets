@@ -106,7 +106,19 @@ public class TimelineActivity extends AppCompatActivity {
     }
 
     void handleNewCreatedTweet(Tweet tweet) {
+        insertNewTweet(tweet);
+    }
 
+    void insertNewTweet(Tweet tweet) {
+        int index = 0;
+        for(Tweet currTweet : tweets) {
+            if (currTweet.uid > tweet.uid) {
+                ++index;
+            }
+        }
+
+        tweets.add(index, tweet);
+        tweetAdapter.notifyItemInserted(index);
     }
 
     void populateTimelineDelayed(final int count, final long maxId, long delayMillis) {
