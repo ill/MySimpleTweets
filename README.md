@@ -53,7 +53,7 @@ Make the list scroll to the position of the new tweet when creating one.
 
 Here's a walkthrough of implemented user stories:
 
-<img src='http://i.imgur.com/link/to/your/gif/file.gif' title='Video Walkthrough' width='' alt='Video Walkthrough' />
+<img src='https://github.com/ill/MySimpleTweets/blob/master/Recording.gif' title='Video Walkthrough' width='' alt='Video Walkthrough' />
 
 GIF created with [LiceCap](http://www.cockos.com/licecap/).
 
@@ -63,7 +63,7 @@ Describe any challenges encountered while building the app.
 
 I ran into issues with auth and followed the FAQ guide for getting unstuck.  My emulator was device version 7 not 6.
 
-I also ran into rate limiting issues and had to wait about 15 minutes.
+I also ran into rate limiting issues and had to wait about 15 minutes on multiple occasions.  At one point I really wanted to test page sizes of 2 just to see what would happen.  That was a bad idea.  There are probably ways to prevent this better.  I used the same delay logic I used in my NYTimes search project to mitigate calling it too often.
 
 ## Open-source libraries used
 
