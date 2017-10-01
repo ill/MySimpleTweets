@@ -31,6 +31,7 @@ public class TimelineActivity extends AppCompatActivity {
     TweetAdapter tweetAdapter;
     ArrayList<Tweet> tweets;
     RecyclerView rvTweets;
+    LinearLayoutManager linearLayoutManager;
 
     long currentMaxId;
 
@@ -45,7 +46,7 @@ public class TimelineActivity extends AppCompatActivity {
         tweets = new ArrayList<>();
         tweetAdapter = new TweetAdapter(tweets);
 
-        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
+        linearLayoutManager = new LinearLayoutManager(this);
 
         rvTweets.setLayoutManager(linearLayoutManager);
         rvTweets.setAdapter(tweetAdapter);
@@ -106,10 +107,10 @@ public class TimelineActivity extends AppCompatActivity {
     }
 
     void handleNewCreatedTweet(Tweet tweet) {
-        insertNewTweet(tweet);
+        linearLayoutManager.scrollToPosition(insertNewTweet(tweet));
     }
 
-    void insertNewTweet(Tweet tweet) {
+    int insertNewTweet(Tweet tweet) {
         int index = 0;
         for(Tweet currTweet : tweets) {
             if (currTweet.uid > tweet.uid) {
@@ -119,6 +120,8 @@ public class TimelineActivity extends AppCompatActivity {
 
         tweets.add(index, tweet);
         tweetAdapter.notifyItemInserted(index);
+
+        return index;
     }
 
     void populateTimelineDelayed(final int count, final long maxId, long delayMillis) {
