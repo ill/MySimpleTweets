@@ -3,11 +3,13 @@ package com.codepath.apps.restclienttemplate.models;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.Serializable;
+
 /**
  * Created by ilyaseletsky on 9/29/17.
  */
 
-public class Tweet {
+public class Tweet implements Serializable {
 
     public String body;
     public long uid;

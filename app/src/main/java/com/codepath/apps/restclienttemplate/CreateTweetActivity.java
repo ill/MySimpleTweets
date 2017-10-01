@@ -1,5 +1,6 @@
 package com.codepath.apps.restclienttemplate;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -17,6 +18,9 @@ import org.json.JSONObject;
 import cz.msebera.android.httpclient.Header;
 
 public class CreateTweetActivity extends AppCompatActivity {
+
+    public static final int NEW_TWEET_REQUEST_CODE = 1337;
+    public static final String NEW_TWEET_DATA_KEY = "newTweet";
 
     TextView etTweet;
     TwitterClient client;
@@ -41,7 +45,11 @@ public class CreateTweetActivity extends AppCompatActivity {
     }
 
     void onSuccessTweet(Tweet tweet) {
-        
+        Intent data = new Intent();
+        data.putExtra(NEW_TWEET_DATA_KEY, tweet);
+
+        setResult(RESULT_OK, data);
+        finish();
     }
 
     void onFailureReset() {

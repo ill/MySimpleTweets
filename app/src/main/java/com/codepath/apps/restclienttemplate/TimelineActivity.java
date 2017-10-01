@@ -88,10 +88,25 @@ public class TimelineActivity extends AppCompatActivity {
         return true;
     }
 
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        // REQUEST_CODE is defined above
+        if (resultCode == RESULT_OK && requestCode == CreateTweetActivity.NEW_TWEET_REQUEST_CODE) {
+            // Extract name value from result extras
+            Tweet tweet = (Tweet) data.getExtras().getSerializable(CreateTweetActivity.NEW_TWEET_DATA_KEY);
+
+            handleNewCreatedTweet(tweet);
+        }
+    }
+
     void newTweet() {
         Intent intent = new Intent(getApplicationContext(), CreateTweetActivity.class);
 
-        startActivity(intent);
+        startActivityForResult(intent, CreateTweetActivity.NEW_TWEET_REQUEST_CODE);
+    }
+
+    void handleNewCreatedTweet(Tweet tweet) {
+
     }
 
     void populateTimelineDelayed(final int count, final long maxId, long delayMillis) {
