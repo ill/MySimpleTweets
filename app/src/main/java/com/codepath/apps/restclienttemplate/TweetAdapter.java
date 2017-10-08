@@ -24,10 +24,16 @@ import java.util.Locale;
 
 public class TweetAdapter extends RecyclerView.Adapter<TweetAdapter.ViewHolder> {
 
+    public interface TweetAdapterListener {
+        public void onItemSelected(View view, int position);
+    }
+
     private List<Tweet> mTweets;
     Context context;
+    TweetAdapterListener mListener;
 
-    public TweetAdapter(List<Tweet> tweets) {
+    public TweetAdapter(List<Tweet> tweets, TweetAdapterListener listener) {
+        mListener = listener;
         mTweets = tweets;
     }
 
@@ -80,7 +86,7 @@ public class TweetAdapter extends RecyclerView.Adapter<TweetAdapter.ViewHolder> 
         return mTweets.size();
     }
 
-    public static class ViewHolder extends RecyclerView.ViewHolder {
+    public class ViewHolder extends RecyclerView.ViewHolder {
         public ImageView ivProfileImage;
         public TextView tvUsername;
         public TextView tvName;
@@ -95,6 +101,17 @@ public class TweetAdapter extends RecyclerView.Adapter<TweetAdapter.ViewHolder> 
             tvName = (TextView) itemView.findViewById(R.id.tvName);
             tvTime = (TextView) itemView.findViewById(R.id.tvTime);
             tvBody = (TextView) itemView.findViewById(R.id.tvBody);
+
+            //I could refactor it so it's called profile view onClickListener but whatever
+            ivProfileImage.setOnClickListener(new View.OnClickListener(){
+                @Override
+                public void onClick(View v) {
+                    if (mListener != null) {
+                        int position = getAdapterPosition();
+                        mListener.onItemSelected(v, position);
+                    }
+                }
+            });
         }
     }
 }

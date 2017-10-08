@@ -2,69 +2,28 @@ package com.codepath.apps.restclienttemplate;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.Handler;
+import android.support.design.widget.TabLayout;
+import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import com.codepath.apps.restclienttemplate.fragments.TweetsListFragment;
+import com.codepath.apps.restclienttemplate.fragments.TweetsPagerAdapter;
 import com.codepath.apps.restclienttemplate.models.Tweet;
-import com.loopj.android.http.JsonHttpResponseHandler;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
+import static com.codepath.apps.restclienttemplate.ProfileActivity.USER_KEY;
 
-import java.util.ArrayList;
-
-import cz.msebera.android.httpclient.Header;
-
-public class TimelineActivity extends AppCompatActivity {
-
-    static final int PAGE_SIZE = 15;
-
-    private EndlessRecyclerViewScrollListener scrollListener;
-
-    TwitterClient client;
-    TweetAdapter tweetAdapter;
-    ArrayList<Tweet> tweets;
-    RecyclerView rvTweets;
-    LinearLayoutManager linearLayoutManager;
-
-    long currentMaxId;
-
+public class TimelineActivity extends AppCompatActivity implements TweetsListFragment.TweetSelectedListener {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_timeline);
-        client = TwitterApp.getRestClient();
 
-        rvTweets = (RecyclerView) findViewById(R.id.rvTweet);
-
-        tweets = new ArrayList<>();
-        tweetAdapter = new TweetAdapter(tweets);
-
-        linearLayoutManager = new LinearLayoutManager(this);
-
-        rvTweets.setLayoutManager(linearLayoutManager);
-        rvTweets.setAdapter(tweetAdapter);
-
-        scrollListener = new EndlessRecyclerViewScrollListener(linearLayoutManager) {
-            @Override
-            public void onLoadMore(int page, int totalItemsCount, RecyclerView view) {
-                // Triggered only when new data needs to be appended to the list
-                // Add whatever code is needed to append new items to the bottom of the list
-                //loadNextDataFromApi(page);
-                populateTimelineDelayed(PAGE_SIZE, currentMaxId, 500);
-            }
-        };
-        // Adds the scroll listener to RecyclerView
-        rvTweets.addOnScrollListener(scrollListener);
-
-        currentMaxId = -1;
-        populateTimelineDelayed(PAGE_SIZE, -1, 500);
+        ViewPager vpPager = (ViewPager) findViewById(R.id.viewpager);
+        vpPager.setAdapter(new TweetsPagerAdapter(getSupportFragmentManager(), this));
+        TabLayout tabLayout = (TabLayout)findViewById(R.id.sliding_tabs);
+        tabLayout.setupWithViewPager(vpPager);
     }
 
     @Override
@@ -82,6 +41,10 @@ public class TimelineActivity extends AppCompatActivity {
                 newTweet();
                 break;
 
+            case R.id.miProfile:
+                showProfile();
+                break;
+
             default:
                 break;
         }
@@ -96,7 +59,8 @@ public class TimelineActivity extends AppCompatActivity {
             // Extract name value from result extras
             Tweet tweet = (Tweet) data.getExtras().getSerializable(CreateTweetActivity.NEW_TWEET_DATA_KEY);
 
-            handleNewCreatedTweet(tweet);
+            //TODO: Tell Home Timeline
+            //tweetsListFragment.handleNewCreatedTweet(tweet);
         }
     }
 
@@ -106,83 +70,17 @@ public class TimelineActivity extends AppCompatActivity {
         startActivityForResult(intent, CreateTweetActivity.NEW_TWEET_REQUEST_CODE);
     }
 
-    void handleNewCreatedTweet(Tweet tweet) {
-        linearLayoutManager.scrollToPosition(insertNewTweet(tweet));
+    void showProfile() {
+        Intent intent = new Intent(getApplicationContext(), ProfileActivity.class);
+
+        startActivity(intent);
     }
 
-    int insertNewTweet(Tweet tweet) {
-        int index = 0;
-        for(Tweet currTweet : tweets) {
-            if (currTweet.uid > tweet.uid) {
-                ++index;
-            }
-        }
+    @Override
+    public void onTweetSelected(Tweet tweet) {
+        Intent intent = new Intent(getApplicationContext(), ProfileActivity.class);
+        intent.putExtra(USER_KEY, tweet.user);
 
-        tweets.add(index, tweet);
-        tweetAdapter.notifyItemInserted(index);
-
-        return index;
-    }
-
-    void populateTimelineDelayed(final int count, final long maxId, long delayMillis) {
-        final Handler handler = new Handler();
-        handler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                populateTimeline(count, maxId);
-            }
-        }, delayMillis);
-    }
-
-    private void tryUpdateMaxId(long newMaxId) {
-        if (currentMaxId < 0 || newMaxId < currentMaxId) {
-            currentMaxId = newMaxId - 1;
-        }
-    }
-
-    private void populateTimeline(int count, long maxId) {
-        client.getHomeTimeline(count, maxId, new JsonHttpResponseHandler() {
-            @Override
-            public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
-                Log.d("TwitterClient", response.toString());
-            }
-
-            @Override
-            public void onSuccess(int statusCode, Header[] headers, JSONArray response) {
-                Log.d("TwitterClient", response.toString());
-
-                for (int i = 0; i < response.length(); i++) {
-                    try {
-                        Tweet tweet = Tweet.fromJSON(response.getJSONObject(i));
-                        tweets.add(tweet);
-
-                        tryUpdateMaxId(tweet.uid);
-
-                        tweetAdapter.notifyItemInserted(tweets.size() - 1);
-                    }
-                    catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
-
-            @Override
-            public void onFailure(int statusCode, Header[] headers, String responseString, Throwable throwable) {
-                Log.d("TwitterClient", responseString);
-                throwable.printStackTrace();
-            }
-
-            @Override
-            public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONObject errorResponse) {
-                Log.d("TwitterClient", errorResponse.toString());
-                throwable.printStackTrace();
-            }
-
-            @Override
-            public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONArray errorResponse) {
-                Log.d("TwitterClient", errorResponse.toString());
-                throwable.printStackTrace();
-            }
-        });
+        startActivity(intent);
     }
 }

@@ -4,7 +4,13 @@
 
     <item
         android:id="@+id/btnTweet"
-        android:icon="@android:drawable/ic_input_add"
+        android:icon="@drawable/ic_add_circle_outline_white_24dp"
         android:title="@string/btnTweet"
+        app:showAsAction="always" />
+
+    <item
+        android:id="@+id/miProfile"
+        android:icon="@drawable/ic_person_white_24dp"
+        android:title="Add"
         app:showAsAction="always" />
 </menu>
