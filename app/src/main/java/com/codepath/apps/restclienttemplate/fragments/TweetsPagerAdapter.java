@@ -10,12 +10,16 @@ import android.support.v4.app.FragmentPagerAdapter;
  */
 
 public class TweetsPagerAdapter extends FragmentPagerAdapter {
-
+    HomeTimelineFragment homeTimelineFragment;
     private String tabTitles[] = new String[] {"Home", "Mentions"};
     Context context;
 
-    public TweetsPagerAdapter(FragmentManager fm, Context context) {
+    public TweetsPagerAdapter(FragmentManager fm,
+                              Context context,
+                              HomeTimelineFragment homeTimelineFragment) {
         super(fm);
+        //Kindof a quick way to just have a reference to it
+        this.homeTimelineFragment = homeTimelineFragment;
         this.context = context;
     }
 
@@ -27,7 +31,7 @@ public class TweetsPagerAdapter extends FragmentPagerAdapter {
     @Override
     public Fragment getItem(int position) {
         if (position == 0) {
-            return new HomeTimelineFragment();
+            return homeTimelineFragment;
         }
         else if (position == 1) {
             return new MentionsTimelineFragment();

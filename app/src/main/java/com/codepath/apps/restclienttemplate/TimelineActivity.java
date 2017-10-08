@@ -8,6 +8,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import com.codepath.apps.restclienttemplate.fragments.HomeTimelineFragment;
 import com.codepath.apps.restclienttemplate.fragments.TweetsListFragment;
 import com.codepath.apps.restclienttemplate.fragments.TweetsPagerAdapter;
 import com.codepath.apps.restclienttemplate.models.Tweet;
@@ -15,13 +16,16 @@ import com.codepath.apps.restclienttemplate.models.Tweet;
 import static com.codepath.apps.restclienttemplate.ProfileActivity.USER_KEY;
 
 public class TimelineActivity extends AppCompatActivity implements TweetsListFragment.TweetSelectedListener {
+    HomeTimelineFragment homeTimelineFragment;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_timeline);
 
         ViewPager vpPager = (ViewPager) findViewById(R.id.viewpager);
-        vpPager.setAdapter(new TweetsPagerAdapter(getSupportFragmentManager(), this));
+        homeTimelineFragment = new HomeTimelineFragment();
+        vpPager.setAdapter(new TweetsPagerAdapter(getSupportFragmentManager(), this, homeTimelineFragment));
         TabLayout tabLayout = (TabLayout)findViewById(R.id.sliding_tabs);
         tabLayout.setupWithViewPager(vpPager);
     }
@@ -59,8 +63,7 @@ public class TimelineActivity extends AppCompatActivity implements TweetsListFra
             // Extract name value from result extras
             Tweet tweet = (Tweet) data.getExtras().getSerializable(CreateTweetActivity.NEW_TWEET_DATA_KEY);
 
-            //TODO: Tell Home Timeline
-            //tweetsListFragment.handleNewCreatedTweet(tweet);
+            homeTimelineFragment.handleNewCreatedTweet(tweet);
         }
     }
 
